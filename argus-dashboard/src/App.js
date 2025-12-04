@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios'; 
-// mockData는 아직 API가 없는 로봇/CCTV용으로 남겨둠
 import { mockData } from './data'; 
 import Header from './components/Header';
 import FixedCCTVCard from './components/FixedCCTVCard';
@@ -11,43 +10,33 @@ import RobotStatusPanel from './components/RobotStatusPanel';
 import IncidentPhotoArchive from './components/IncidentPhotoArchive';
 
 function App() {
-  // 1. 데이터 담을 그릇 (초기값은 비어있거나 가짜 데이터)
   const [systemStatus, setSystemStatus] = useState(mockData.systemStatus);
   const [incidents, setIncidents] = useState([]); 
   
   const cctvs = mockData.cctvs;
-  const robotData = mockData.robot;
   const thermalStats = mockData.thermalStats;
 
-  // 2. AWS 서버에서 데이터 가져오기 (3초마다 반복)
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // ★ 여기가 핵심! 선생님의 AWS 서버 주소 (FastAPI)
         const awsIp = "http://43.202.245.190:8000";
 
-        // (1) 사고 기록 가져오기
         const logRes = await axios.get(`${awsIp}/api/logs`);
-        
-        // (2) 시스템 상태 가져오기
         const statusRes = await axios.get(`${awsIp}/api/status`);
         
-        // 화면에 맞게 데이터 가공
         const formattedLogs = logRes.data.map(log => ({
           id: log.id,
           type: log.event_type, 
           location: 'Cam 01',   
           time: log.created_at,
-          // 이미지가 없으면 빨간색 박스로 표시
           img: log.image_path || 'https://via.placeholder.com/150/FF0000/FFFFFF?text=DETECTED' 
         }));
 
         setIncidents(formattedLogs);
         setSystemStatus(statusRes.data.system_status);
-        console.log("✅ AWS 데이터 수신 성공:", formattedLogs);
 
       } catch (error) {
-        console.error("❌ AWS 연결 실패 (서버가 켜져 있는지 확인하세요!):", error);
+        console.error("❌ AWS 연결 실패:", error);
       }
     };
 
@@ -61,26 +50,54 @@ function App() {
       <Header systemStatus={systemStatus} activeAlerts={incidents.length} />
 
       <main className="p-4 grid grid-cols-12 gap-4">
-        {/* 왼쪽: CCTV */}
+        
+        {/* 왼쪽: 실시간 영상 + CCTV 목록 */}
         <div className="col-span-12 md:col-span-3 flex flex-col gap-4">
-          {cctvs.map(cctv => (
+          
+          {/* 👇 1. 실시간 영상 */}
+          <div className="bg-gray-800 rounded-xl p-3 border border-gray-700 shadow-lg">
+            <h3 className="text-md font-bold text-white mb-2 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+              Live Cam 01
+            </h3>
+            <div className="aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center relative">
+              <img 
+                src="http://43.202.245.190:8000/video_feed" 
+                alt="연결 대기중..." 
+                className="w-full h-full object-contain"
+                //onError={(e) => {e.target.style.display='none'}}
+                onError={(e) => {console.log("영상 로딩 실패!");e.target.style.border = "5px solid red"; }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center -z-10 text-gray-500 text-xs">
+                <p>신호 없음</p>
+              </div>
+            </div>
+            <div className="mt-2 text-xs text-gray-400 flex justify-between">
+              <span>상태: <span className="text-green-400">온라인</span></span>
+              <span>화질: 720p</span>
+            </div>
+          </div>
+
+          {/* 2. 나머지 가짜 CCTV 목록들 */}
+          {cctvs.slice(1).map(cctv => (
             <FixedCCTVCard key={cctv.id} data={cctv} />
           ))}
         </div>
 
-        {/* 중앙: 로봇/열화상 */}
+        {/* 중앙: 로봇 상태 카드 + 열화상 패널 */}
         <div className="col-span-12 md:col-span-6 flex flex-col gap-4">
-          <MobileRobotCard robotData={robotData} />
+          {/* 원래 있던 로봇 카드로 복구! */}
+          <MobileRobotCard robotData={mockData.robot} />
           <ThermalDetectionPanel stats={thermalStats} />
         </div>
 
         {/* 오른쪽: 제어/상태 */}
         <div className="col-span-12 md:col-span-3 flex flex-col gap-4">
-          <RobotCommandPanel robotData={robotData} />
-          <RobotStatusPanel robotData={robotData} />
+          <RobotCommandPanel robotData={mockData.robot} />
+          <RobotStatusPanel robotData={mockData.robot} />
         </div>
 
-        {/* 하단: AWS 실제 데이터 표시 영역 */}
+        {/* 하단: 실시간 감지 로그 */}
         <div className="col-span-12 mt-4">
           <h2 className="text-xl font-bold mb-4 text-red-400">🚨 AWS 실시간 감지 로그 (Live)</h2>
           <IncidentPhotoArchive incidents={incidents} />
