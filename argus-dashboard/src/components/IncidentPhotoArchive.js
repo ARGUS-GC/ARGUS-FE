@@ -23,18 +23,24 @@ const IncidentPhotoArchive = ({ incidents }) => {
             <div key={inc.id} className="bg-gray-900 rounded border border-gray-700 overflow-hidden group hover:border-blue-500 transition cursor-pointer">
                 {/* 썸네일 영역 */}
                 <div className="h-24 bg-gray-800 relative flex items-center justify-center">
-                    {/* 색상 띠 */}
-                    <div className={`absolute top-2 left-2 px-2 py-0.5 text-[10px] font-bold text-white rounded bg-${inc.color}-600`}>
+                    
+                    {/* [수정됨] 이모지(span)를 지우고, 진짜 이미지(img) 태그를 삽입! */}
+                    <img 
+                        src={inc.img} 
+                        alt={inc.type} 
+                        className="w-full h-full object-cover"
+                    />
+
+                    {/* 색상 띠 (라벨) */}
+                    <div className={`absolute top-2 left-2 px-2 py-0.5 text-[10px] font-bold text-white rounded bg-red-600`}>
                         {inc.type}
                     </div>
-                    <span className="text-4xl opacity-50">
-                        {inc.type === 'FIRE' ? '🔥' : inc.type === 'INTRUSION' ? '🕵️' : '⚠️'}
-                    </span>
                 </div>
+                
                 {/* 텍스트 정보 */}
                 <div className="p-2">
-                    <div className="text-xs text-gray-500 mb-1">{inc.time} | {inc.source}</div>
-                    <div className={`text-xs font-bold text-${inc.color}-400 truncate`}>{inc.desc}</div>
+                    <div className="text-xs text-gray-500 mb-1">{inc.time} | {inc.location}</div>
+                    <div className="text-xs font-bold text-gray-300 truncate">감지됨: {inc.type}</div>
                 </div>
             </div>
         ))}
