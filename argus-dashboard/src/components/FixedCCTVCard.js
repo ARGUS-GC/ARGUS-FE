@@ -9,9 +9,24 @@ const FixedCCTVCard = ({ data }) => {
     <Card title={`📷 ${data.name}`}>
       <div className="relative bg-gray-900 h-48 rounded-lg overflow-hidden flex justify-center items-center border border-gray-700">
         
-        {/* 비디오 플레이스홀더 (실제 구현 시 video 태그 사용) */}
-        <div className={`absolute inset-0 ${isThermal ? 'bg-gradient-to-tr from-red-900 via-orange-800 to-yellow-900 opacity-80' : 'bg-black/50'}`}></div>
-        <span className="text-gray-500 text-4xl z-10 opacity-50">📹</span>
+        {/*실제 구현 위해 video tag 사용 */}
+        {data.videoUrl ? (
+          <img 
+            src={data.videoUrl} 
+            alt={data.name}
+            className="w-full h-full object-contain bg-black" // 영상 비율 유지, 배경 검정
+            onError={(e) => {
+              // 이미지 로딩 실패 시 숨김 처리
+              e.target.style.display = 'none'; 
+            }}
+          />
+        ) : (
+          // 영상 주소가 없을 때 보여줄 배경
+          <div className={`absolute inset-0 ${isThermal ? 'bg-gradient-to-tr from-red-900 via-orange-800 to-yellow-900 opacity-80' : 'bg-black/50'}`}></div>
+        )}
+
+        {/* 아이콘: 영상이 없거나, 영상 로딩이 실패해서 videoUrl은 있지만 이미지가 안 보일 때를 대비해 z-index 낮춰서 뒤에 깔아둠 */}
+        <span className="text-gray-500 text-4xl z-0 opacity-50 absolute">📹</span>
 
         {/* 상태 배지 */}
         <div className="absolute top-2 left-2 flex gap-2">
