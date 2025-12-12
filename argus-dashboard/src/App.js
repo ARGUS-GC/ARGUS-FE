@@ -10,7 +10,8 @@ import RobotStatusPanel from './components/RobotStatusPanel';
 import IncidentPhotoArchive from './components/IncidentPhotoArchive';
 
 // ⚠️ 백엔드 서버 IP (로컬이면 localhost, AWS면 해당 IP)
-const API_BASE_URL = "http://43.202.245.190:8000"; 
+// const API_BASE_URL = "http://43.202.245.190:8000"; 
+const API_BASE_URL = "http://localhost:8000"; 
 
 function App() {
   // 1. 상태 관리
@@ -67,18 +68,23 @@ function App() {
           let displayType = "알 수 없는 위험";
           let severity = "High"; 
 
-          if (log.event_type === "FIRE") {
+          const eventTypeSafe = log.event_type || ""; 
+
+          if (eventTypeSafe === "FIRE") {
             displayType = "🔥 화재 감지";
-          } else if (log.event_type === "NO_HELMET") {
+          } else if (eventTypeSafe === "NO_HELMET") {
             displayType = "👷 헬멧 미착용";
             severity = "Medium"; 
-          } else if (log.event_type.includes("LONE_WORKER")) {
-            const zoneNum = log.event_type.split('_').pop(); 
-            displayType = `⚠️ 나홀로 작업 (구역 ${zoneNum})`;
-          } else if (log.event_type === "INTRUDER") {
+          } else if (eventTypeSafe.includes("LONE_WORKER")) { // 이제 안전하게 includes 사용 가능
+            const parts = eventTypeSafe.split('_');
+            const zoneNum = parts[parts.length - 1]; 
+            // 숫자가 아니면 '미상' 처리
+            displayType = `⚠️ 단독 작업 감지 (구역 ${isNaN(zoneNum) ? '미상' : zoneNum})`;
+          } else if (eventTypeSafe === "INTRUDER") {
             displayType = "🏃 침입자 감지";
           } else {
-             displayType = log.event_type; 
+             // 값이 아예 없으면 "데이터 없음", 있으면 원래 값 표시
+             displayType = log.event_type ? log.event_type : "데이터 없음"; 
           }
 
           return {

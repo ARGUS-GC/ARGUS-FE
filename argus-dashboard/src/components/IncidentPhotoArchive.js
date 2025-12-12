@@ -9,7 +9,7 @@ const IncidentPhotoArchive = ({ incidents }) => {
     if (typeString.includes("화재") || typeString.includes("FIRE") || typeString.includes("침입")) {
       return "bg-red-600 text-white"; // 긴급 (빨강)
     }
-    if (typeString.includes("나홀로") || typeString.includes("LONE")) {
+    if (typeString.includes("단독") || typeString.includes("LONE")) {
       return "bg-orange-500 text-white"; // 경고 (주황)
     }
     if (typeString.includes("헬멧") || typeString.includes("HELMET") || typeString.includes("NO_HELMET")) {
