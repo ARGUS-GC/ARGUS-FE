@@ -10,7 +10,8 @@ import RobotStatusPanel from './components/RobotStatusPanel';
 import IncidentPhotoArchive from './components/IncidentPhotoArchive';
 
 // ⚠️ 백엔드 서버 IP (로컬이면 localhost, AWS면 해당 IP)
-const API_BASE_URL = "http://43.202.245.190:8000"; 
+// const API_BASE_URL = "http://43.202.245.190:8000";
+const API_BASE_URL = "http://localhost:8000";
 
 function App() {
   // 1. 상태 관리
